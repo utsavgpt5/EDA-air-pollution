@@ -1,0 +1,130 @@
+library(ggplot2)
+library(dplyr)
+library(plyr)
+
+setwd("\\\\uk/pwc/Citrix/UK-Data/936390/Documents/EDA2/data")
+
+if(!file.exists("./EDA2/data")){dir.create("./EDA2/data")}
+fileUrl<-"https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
+download.file(fileUrl,destfile = "./EDA2/data/Dataset.zip")
+unzip(zipfile = "./EDA2/data/Dataset.zip",exdir = "./EDA2/data")
+
+NEI<-readRDS("summarySCC_PM25.rds")
+SCC <- readRDS("Source_Classification_Code.rds")
+View(NEI[1:10,])
+View(SCC[1:10,])
+
+
+##1
+library(dplyr)
+library(plyr)
+
+if(!file.exists("./EDA2/data")){dir.create("./EDA2/data")}
+fileUrl<-"https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
+download.file(fileUrl,destfile = "./EDA2/data/Dataset.zip")
+unzip(zipfile = "./EDA2/data/Dataset.zip",exdir = "./EDA2/data")
+
+NEI<-readRDS("summarySCC_PM25.rds")
+
+Em_yr<-NEI%>%group_by(year)%>%summarize(TotalEmission=sum(Emissions))
+Em_yr
+clr<-c("lightblue","tan1","plum","lightpink")
+with(Em_yr,barplot(height=TotalEmission/1000,names.arg = year,xlab = "Year",ylab=expression('Total PM'[2.5]*' Emissions in KiloTons'),main=expression('PM'[2.5]*' Emission level from 1999 to 2008 in KiloTons'),ylim=c(0,8000),col = clr))
+dev.copy(png,"plot1.png")
+dev.off()
+
+
+
+##2
+library(dplyr)
+library(plyr)
+
+if(!file.exists("./EDA2/data")){dir.create("./EDA2/data")}
+fileUrl<-"https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
+download.file(fileUrl,destfile = "./EDA2/data/Dataset.zip")
+unzip(zipfile = "./EDA2/data/Dataset.zip",exdir = "./EDA2/data")
+
+NEI<-readRDS("summarySCC_PM25.rds")
+
+Em_blt<-NEI%>%group_by(year)%>%filter(fips=="24510")%>%summarize(TotalEmission=sum(Emissions))
+Em_blt
+blt<-with(Em_blt,barplot(height=TotalEmission/1000,names.arg = year,xlab = "Year",ylab=expression('Total PM'[2.5]* 'emissions in KiloTons'),main=expression('PM'[2.5]*' Emission level from 1999 to 2008 in KiloTons for Baltimore city,Maryland'),ylim=c(0,4),col=clr))
+text(x=blt,y=round(Em_blt$TotalEmission/1000,2),label=round(Em_blt$TotalEmission/1000,2),pos=3,cex=0.8,col="black")
+dev.copy(png,"plot2.png")
+dev.off()
+
+##3
+library(ggplot2)
+library(dplyr)
+library(plyr)
+
+if(!file.exists("./EDA2/data")){dir.create("./EDA2/data")}
+fileUrl<-"https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
+download.file(fileUrl,destfile = "./EDA2/data/Dataset.zip")
+unzip(zipfile = "./EDA2/data/Dataset.zip",exdir = "./EDA2/data")
+
+NEI<-readRDS("summarySCC_PM25.rds")
+
+balt<-NEI%>%filter(fips=="24510")%>%group_by(year,type)%>%summarize(Emissions=sum(Emissions))
+ggplot(balt,aes(x=as.factor(year),y=Emissions/1000,fill=type,label=round(Emissions/1000,2)))+geom_bar(stat="identity")+facet_grid(.~type)+xlab("year")+ylab(expression('PM'[2.5]*'Emissions in kilotons'))+ggtitle(expression("PM"[2.5]*paste("Emissions in Baltimore ","City by various source types", sep="")))+theme(axis.text.x = element_text(angle = 90, hjust = 1))+geom_label(aes(fill = type), colour = "white", fontface = "bold")
+dev.copy(png,"plot3.png")
+dev.off()
+
+##4
+library(ggplot2)
+library(dplyr)
+library(plyr)
+
+if(!file.exists("./EDA2/data")){dir.create("./EDA2/data")}
+fileUrl<-"https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
+download.file(fileUrl,destfile = "./EDA2/data/Dataset.zip")
+unzip(zipfile = "./EDA2/data/Dataset.zip",exdir = "./EDA2/data")
+
+NEI<-readRDS("summarySCC_PM25.rds")
+SCC <- readRDS("Source_Classification_Code.rds")
+
+comb_coal<-grepl("*Coal",SCC$EI.Sector)
+comb_coal_sources<-SCC[comb_coal,]
+coal_emissions<-NEI%>%filter(SCC %in% comb_coal_sources$SCC)%>%group_by(year)%>%summarize(Emissions=sum(Emissions))
+ggplot(coal_emissions,aes(x=as.factor(year),y=Emissions/1000,fill=year,label=round(Emissions/1000,2)))+geom_bar(stat = "identity")+xlab("year") + ylab(expression('PM'[2.5]*'Emissions in kilotons'))+ ggtitle(expression("PM"[2.5]*paste("Emissions from coal combustion","related sources in kilotons",sep="-")))+geom_label(aes(fill=year),colour="white",fontface="bold")
+dev.copy(png,"plot4.png")
+dev.off()
+
+##5
+library(ggplot2)
+library(dplyr)
+library(plyr)
+
+if(!file.exists("./EDA2/data")){dir.create("./EDA2/data")}
+fileUrl<-"https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
+download.file(fileUrl,destfile = "./EDA2/data/Dataset.zip")
+unzip(zipfile = "./EDA2/data/Dataset.zip",exdir = "./EDA2/data")
+
+
+NEI<-readRDS("summarySCC_PM25.rds")
+
+balt_road<-NEI%>%filter(fips=="24510"&type=="ON-ROAD")%>%group_by(year)%>%summarize(Emissions=sum(Emissions))
+ggplot(balt_road,aes(x=as.factor(year),y=Emissions/1000,label=round(Emissions/1000,3),fill=year))+geom_bar(stat="identity")+xlab("year")+ylab(expression('PM'[2.5]*' Emissions in KiloTons'))+ggtitle(expression("PM"[2.5]*"Emissions for Motor vehicles in Baltimore City "))+geom_label(aes(fill=year),colour="white",fontface="bold")
+dev.copy(png,"plot5.png")
+dev.off()
+
+##6
+library(ggplot2)
+library(dplyr)
+library(plyr)
+
+if(!file.exists("./EDA2/data")){dir.create("./EDA2/data")}
+fileUrl<-"https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
+download.file(fileUrl,destfile = "./EDA2/data/Dataset.zip")
+unzip(zipfile = "./EDA2/data/Dataset.zip",exdir = "./EDA2/data")
+
+NEI<-readRDS("summarySCC_PM25.rds")
+
+balt_road<-NEI%>%filter(fips=="24510"&type=="ON-ROAD")%>%group_by(year)%>%summarize(Emissions=sum(Emissions))
+LA_road<-NEI%>%filter(fips=="06037"&type=="ON-ROAD")%>%group_by(year)%>%summarize(Emissions=sum(Emissions))
+balt_road$County.Name<-"Baltimore City, Maryland"    
+LA_road$County.Name<-"Los Angeles County, California"
+LA_balt_road<-rbind(balt_road,LA_road)
+ggplot(LA_balt_road,aes(x=as.factor(year),y=Emissions/1000,fill=County.Name,label=round(Emissions/1000,2)))+geom_bar(stat="identity")+facet_grid(.~County.Name)+xlab("year")+ylab(expression('PM'[2.5]*'Emissions in kilotons'))+ggtitle(expression("PM"[2.5]*paste("Emissions in Baltimore and LA ","by motor vehicles", sep="")))+theme(axis.text.x = element_text(angle = 90, hjust = 1))+geom_label(aes(fill = County.Name), colour = "black")
+dev.copy(png,"plot6.png")
+dev.off()
